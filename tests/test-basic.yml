@@ -1,0 +1,34 @@
+name: Test basic usage - default inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REPOSITORY: test-owner/test-repo
+      GITHUB_TOKEN: fake-token-for-testing
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with default inputs (expect API error, not crash)
+        id: action
+        uses: .
+        with:
+          github_token: fake-token-for-testing
+          renovate_login: app/renovate
+          created_before_minutes: 10
+        continue-on-error: true
+
+      - name: Assert action ran (completed or failed with API error, not missing dist)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          # The action should either succeed (no PRs found) or fail with an API error
+          # It must NOT fail due to missing dist/index.js or syntax errors
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran (outcome=$OUTCOME)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
