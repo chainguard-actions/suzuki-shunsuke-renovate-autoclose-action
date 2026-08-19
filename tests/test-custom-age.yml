@@ -1,4 +1,4 @@
-name: Test basic usage - default inputs
+name: Test custom created_before_minutes
 on:
   workflow_dispatch:
 jobs:
@@ -10,7 +10,8 @@ jobs:
         uses: .
         with:
           github_token: ${{ github.token }}
-      - name: Assert action completed successfully
+          created_before_minutes: 60
+      - name: Assert action completed successfully with custom age
         run: |
-          echo "Action completed without error"
+          echo "Action completed with created_before_minutes=60"
           echo "PASS"
